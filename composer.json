@@ -1,7 +1,7 @@
 {
     "name": "topthink/think-annotation",
     "description": "Annotation For ThinkPHP6",
-    "license": "Apache2.0",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "yunwuxin",
