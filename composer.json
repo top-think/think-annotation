@@ -12,17 +12,18 @@
     "require": {
         "topthink/framework": "^6.0",
         "doctrine/annotations": "^1.6",
-        "doctrine/cache": "^1.8"
+        "doctrine/cache": "^1.8",
+        "topthink/think-helper": "^3.0"
     },
     "autoload": {
         "psr-4": {
-            "topthink\\annotation\\": "src"
+            "think\\annotation\\": "src"
         }
     },
     "extra": {
         "think": {
             "services": [
-                "topthink\\annotation\\Service"
+                "think\\annotation\\Service"
             ]
         }
     }

@@ -1,6 +1,8 @@
 <?php
 
-namespace topthink\annotation;
+namespace think\annotation;
+
+use Doctrine\Common\Annotations\Annotation;
 
 /**
  * Class Inject
@@ -8,7 +10,7 @@ namespace topthink\annotation;
  * @Annotation
  * @Target({"PROPERTY"})
  */
-class Inject
+class Inject extends Annotation
 {
 
 }
