@@ -12,8 +12,7 @@
     "require": {
         "topthink/framework": "^6.0",
         "doctrine/annotations": "^1.6",
-        "doctrine/cache": "^1.8",
-        "topthink/think-helper": "^3.0"
+        "php-di/phpdoc-reader": "^2.1"
     },
     "autoload": {
         "psr-4": {
@@ -24,7 +23,10 @@
         "think": {
             "services": [
                 "think\\annotation\\Service"
-            ]
+            ],
+            "config": {
+                "annotation": "src/config.php"
+            }
         }
     }
 }

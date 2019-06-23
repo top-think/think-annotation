@@ -4,65 +4,28 @@ namespace think\annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use ReflectionObject;
-use think\event\HttpRun;
-use think\helper\Arr;
+use Doctrine\Common\Annotations\Reader;
 
 class Service extends \think\Service
 {
-    /** @var AnnotationReader */
-    protected $loader;
+    use InteractsWithRoute, InteractsWithInject;
+
+    /** @var Reader */
+    protected $reader;
 
     public function register()
     {
         AnnotationReader::addGlobalIgnoredName('mixin');
+
         // TODO: this method is deprecated and will be removed in doctrine/annotations 2.0
         AnnotationRegistry::registerLoader('class_exists');
-        $this->loader = new AnnotationReader();
 
+        $this->reader = new CachedReader(new AnnotationReader(), $this->app);
         //注解路由
-        $this->app->event->listen(HttpRun::class, function () {
-            $this->registerAnnotationRoute();
-        });
+        $this->registerAnnotationRoute();
 
         //自动注入
-        $this->app->resolving(function ($object, $app) {
-
-            $refObject = new ReflectionObject($object);
-
-            foreach ($refObject->getProperties() as $refProperty) {
-
-                $annotation = $this->loader->getPropertyAnnotation($refProperty, Inject::class);
-                //TODO
-            }
-        });
-    }
-
-    /**
-     * 注册注解路由
-     */
-    protected function registerAnnotationRoute()
-    {
-        $dir = $this->app->getAppPath() . $this->app->config->get('route.controller_layer');
-
-        foreach ($this->findClasses($dir) as $class) {
-            $refClass = new \ReflectionClass($class);
-
-            foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $refMethod) {
-
-                $annotations = $this->loader->getMethodAnnotations($refMethod);
-
-                /** @var Route $route */
-                $route = Arr::first($annotations, function ($annotation) {
-                    return $annotation instanceof Route;
-                });
-
-                if ($route) {
-                    //注册路由
-                    $this->app->route->rule($route->value, "{$class}@{$refMethod->getName()}", $route->method);
-                }
-            }
-        }
+        $this->autoInject();
     }
 
     /**

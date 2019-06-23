@@ -1,10 +1,13 @@
 <?php
 
 return [
-    'route' => [
-        'enable'      => true,
-        'controllers' => [
-
-        ],
+    'inject' => [
+        'enable'     => true,
+        'namespaces' => [],
     ],
+    'route'  => [
+        'enable'      => true,
+        'controllers' => [],
+    ],
+    'ignore' => [],
 ];

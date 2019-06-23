@@ -5,12 +5,12 @@ namespace think\annotation;
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Class Inject
+ * 属性自动依赖注入
  * @package topthink\annotation
  * @Annotation
  * @Target({"PROPERTY"})
  */
-class Inject extends Annotation
+final class Inject extends Annotation
 {
 
 }

@@ -7,14 +7,17 @@ use Doctrine\Common\Annotations\Annotation\Enum;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
- * Class Route
+ * 注册路由
  * @package topthink\annotation
  * @Annotation
  * @Target({"METHOD","CLASS"})
  */
-class Route extends Annotation
+final class Route extends Annotation
 {
-    /** @Enum({"GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD"}) */
-    public $method;
+    /**
+     * @Enum({"GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD"})
+     * @var string
+     */
+    public $method = "*";
 
 }
