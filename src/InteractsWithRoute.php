@@ -7,7 +7,7 @@ use think\annotation\route\Group;
 use think\annotation\route\Middleware;
 use think\annotation\route\Resource;
 use think\App;
-use think\event\HttpRun;
+use think\event\RouteLoaded;
 
 /**
  * Trait InteractsWithRoute
@@ -23,7 +23,7 @@ trait InteractsWithRoute
     protected function registerAnnotationRoute()
     {
         if ($this->app->config->get('annotation.route.enable', true)) {
-            $this->app->event->listen(HttpRun::class, function () {
+            $this->app->event->listen(RouteLoaded::class, function () {
                 $dirs = [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
                     + $this->app->config->get('annotation.route.controllers', []);
 
