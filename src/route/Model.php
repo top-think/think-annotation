@@ -6,12 +6,20 @@ use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 
 /**
- * 注册资源路由
+ * 注入模型
  * @package think\annotation\route
  * @Annotation
- * @Target({"CLASS"})
+ * @Target({"METHOD"})
  */
-final class Resource extends Rule
+final class Model extends Annotation
 {
+    /**
+     * @var string
+     */
+    public $var = 'id';
 
+    /**
+     * @var boolean
+     */
+    public $exception = true;
 }
