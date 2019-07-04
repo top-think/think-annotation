@@ -36,10 +36,12 @@ trait InteractsWithRoute
                 $this->route = $this->app->route;
 
                 $dirs = [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
-                    + $this->app->config->get('annotation.route.controllers', []);
+                 + $this->app->config->get('annotation.route.controllers', []);
 
                 foreach ($dirs as $dir) {
-                    $this->scanDir($dir);
+                    if (is_dir($dir)) {
+                        $this->scanDir($dir);
+                    }
                 }
             });
         }
@@ -73,7 +75,7 @@ trait InteractsWithRoute
                 $routeGroup = $group->value;
             }
 
-            if ($routeGroup !== false) {
+            if (false !== $routeGroup) {
                 $routeGroup = $this->route->group($routeGroup, $callback);
                 if ($group) {
                     $routeGroup->option($group->getOptions());
