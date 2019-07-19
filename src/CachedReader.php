@@ -5,7 +5,7 @@ namespace think\annotation;
 use Doctrine\Common\Annotations\Reader;
 use ReflectionClass;
 use think\App;
-use think\Cache;
+use think\cache\Driver;
 
 class CachedReader implements Reader
 {
@@ -20,7 +20,7 @@ class CachedReader implements Reader
     private $loadedAnnotations = [];
 
     /**
-     * @var Cache
+     * @var Driver
      */
     private $cache;
 
@@ -146,10 +146,8 @@ class CachedReader implements Reader
 
     private function fetchFromCache($cacheKey, ReflectionClass $class)
     {
-        if (($data = $this->cache->get($cacheKey)) !== false) {
-            if (!$this->debug || $this->isCacheFresh($cacheKey, $class)) {
-                return $data;
-            }
+        if ((!$this->debug || $this->isCacheFresh($cacheKey, $class)) && $this->cache->has($cacheKey)) {
+            return $this->cache->get($cacheKey, false);
         }
 
         return false;
