@@ -60,6 +60,10 @@ trait InteractsWithInject
                             }
                         }
                     }
+
+                    if ($refObject->hasMethod('__injected')) {
+                        $this->app->invokeMethod([$object, '__injected']);
+                    }
                 }
             });
         }
