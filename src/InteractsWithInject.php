@@ -38,20 +38,24 @@ trait InteractsWithInject
                     $refObject = new ReflectionObject($object);
 
                     foreach ($refObject->getProperties() as $refProperty) {
-
                         if ($refProperty->isDefault() && !$refProperty->isStatic()) {
-
                             $annotation = $this->reader->getPropertyAnnotation($refProperty, Inject::class);
-
                             if ($annotation) {
-                                //获取@var类名
-                                $propertyClass = $reader->getPropertyClass($refProperty);
+                                if ($annotation->value) {
+                                    $value = $this->app->make($annotation->value);
+                                } else {
+                                    //获取@var类名
+                                    $propertyClass = $reader->getPropertyClass($refProperty);
+                                    if ($propertyClass) {
+                                        $value = $this->app->make($propertyClass);
+                                    }
+                                }
 
-                                if ($propertyClass) {
+                                if (!empty($value)) {
                                     if (!$refProperty->isPublic()) {
                                         $refProperty->setAccessible(true);
                                     }
-                                    $refProperty->setValue($object, $this->app->make($propertyClass));
+                                    $refProperty->setValue($object, $value);
                                 }
                             }
                         }
