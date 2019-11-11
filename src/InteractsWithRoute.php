@@ -7,10 +7,12 @@ use ReflectionMethod;
 use think\annotation\route\Group;
 use think\annotation\route\Middleware;
 use think\annotation\route\Model;
+use think\annotation\route\Param;
 use think\annotation\route\Resource;
 use think\annotation\route\Validate;
 use think\App;
 use think\event\RouteLoaded;
+use think\exception\ValidateException;
 
 /**
  * Trait InteractsWithRoute
@@ -121,6 +123,19 @@ trait InteractsWithRoute
                     /** @var Validate $validate */
                     if ($validate = $this->reader->getMethodAnnotation($refMethod, Validate::class)) {
                         $rule->validate($validate->value, $validate->scene, $validate->message, $validate->batch);
+                    }
+
+                    // 参数验证
+                    /** @var Param $param */
+                    if ($params = $this->getMethodAnnotations($refMethod,Param::class)){
+                        $validate = new \think\Validate();
+                        foreach ($params as $value ){
+                            $validate->rule($value->name."|".$value->doc,$value->rule);
+                        }
+                        $result = $validate->batch()->check(input());
+                        if(!$result){
+                            throw new ValidateException(join(',',$validate->getError()));
+                        }
                     }
                 }
             }

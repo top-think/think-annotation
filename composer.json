@@ -1,11 +1,11 @@
 {
-    "name": "topthink/think-annotation",
-    "description": "Annotation For ThinkPHP6",
+    "name": "lazyskills/think-annotation",
+    "description": "Annotation Plus For ThinkPHP6",
     "license": "Apache-2.0",
     "authors": [
         {
-            "name": "yunwuxin",
-            "email": "448901948@qq.com"
+            "name": "china_wangyu",
+            "email": "china_wangyu@163.com"
         }
     ],
     "minimum-stability": "dev",
