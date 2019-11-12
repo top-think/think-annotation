@@ -4,15 +4,9 @@ namespace think\annotation;
 
 use Doctrine\Common\Annotations\Reader;
 use ReflectionMethod;
-use think\annotation\route\Group;
-use think\annotation\route\Middleware;
-use think\annotation\route\Model;
-use think\annotation\route\Param;
-use think\annotation\route\Resource;
-use think\annotation\route\Validate;
 use think\App;
 use think\event\RouteLoaded;
-use think\exception\ValidateException;
+use think\Request;
 
 /**
  * Trait InteractsWithRoute
@@ -22,11 +16,14 @@ use think\exception\ValidateException;
  */
 trait InteractsWithRoute
 {
+    
     /**
      * @var \think\Route
      */
     protected $route;
-
+    
+    use InteractsWithRouteAnnotion;
+    
     /**
      * 注册注解路由
      */
@@ -59,37 +56,12 @@ trait InteractsWithRoute
 
             //类
             /** @var Resource $resource */
-            if ($resource = $this->reader->getClassAnnotation($refClass, Resource::class)) {
-                //资源路由
-                $callback = function () use ($class, $resource) {
-                    $this->route->resource($resource->value, $class)
-                        ->option($resource->getOptions());
-                };
-            }
+            $this->setClassRouteResource($refClass,$class,$callback);
 
-            if ($middleware = $this->reader->getClassAnnotation($refClass, Middleware::class)) {
-                $routeGroup      = '';
-                $routeMiddleware = $middleware->value;
-            }
+            $this->setClassRouteMiddleware($refClass,$routeGroup,$routeMiddleware);
 
             /** @var Group $group */
-            if ($group = $this->reader->getClassAnnotation($refClass, Group::class)) {
-                $routeGroup = $group->value;
-            }
-
-            if (false !== $routeGroup) {
-                $routeGroup = $this->route->group($routeGroup, $callback);
-                if ($group) {
-                    $routeGroup->option($group->getOptions());
-                }
-
-                $routeGroup->middleware($routeMiddleware);
-            } else {
-                if ($callback) {
-                    $callback();
-                }
-                $routeGroup = $this->route->getGroup();
-            }
+            $this->setClassRouteGroup($refClass,$routeMiddleware,$routeGroup,$callback);
 
             //方法
             foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $refMethod) {
@@ -97,46 +69,23 @@ trait InteractsWithRoute
                 /** @var Route $route */
                 if ($route = $this->reader->getMethodAnnotation($refMethod, Route::class)) {
 
-                    //注册路由
-                    $rule = $routeGroup->addRule($route->value, "{$class}@{$refMethod->getName()}", $route->method);
+                   $rule = $this->setMethodRoute($route,$refMethod,$routeGroup,$class);
+                    
+                   $this->setMethodRouteMiddleware($refMethod,$rule);
+                   
+                   $this->setMethodRouteGroup($refMethod,$rule);
 
-                    $rule->option($route->getOptions());
+                   $this->setMethodRouteModel($refMethod,$rule);
 
-                    //中间件
-                    if ($middleware = $this->reader->getMethodAnnotation($refMethod, Middleware::class)) {
-                        $rule->middleware($middleware->value);
-                    }
-                    //设置分组别名
-                    if ($group = $this->reader->getMethodAnnotation($refMethod, Group::class)) {
-                        $rule->group($group->value);
-                    }
+                   $this->setMethodRouteValidate($refMethod,$rule);
 
-                    //绑定模型,支持多个
-                    if (!empty($models = $this->getMethodAnnotations($refMethod, Model::class))) {
-                        /** @var Model $model */
-                        foreach ($models as $model) {
-                            $rule->model($model->var, $model->value, $model->exception);
-                        }
-                    }
+                   $this->setMethodRouteParamValidate($refMethod);
+                   
+                   $this->setMethodRbac($refMethod);
 
-                    //验证
-                    /** @var Validate $validate */
-                    if ($validate = $this->reader->getMethodAnnotation($refMethod, Validate::class)) {
-                        $rule->validate($validate->value, $validate->scene, $validate->message, $validate->batch);
-                    }
+                   $this->setMethodLogger($refMethod);
 
-                    // 参数验证
-                    /** @var Param $param */
-                    if ($params = $this->getMethodAnnotations($refMethod,Param::class)){
-                        $validate = new \think\Validate();
-                        foreach ($params as $value ){
-                            $validate->rule($value->name."|".$value->doc,$value->rule);
-                        }
-                        $result = $validate->batch()->check(input());
-                        if(!$result){
-                            throw new ValidateException(join(',',$validate->getError()));
-                        }
-                    }
+                   $this->setMethodJwt($refMethod);
                 }
             }
         }
