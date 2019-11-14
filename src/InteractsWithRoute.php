@@ -4,6 +4,7 @@ namespace think\annotation;
 
 use Doctrine\Common\Annotations\Reader;
 use ReflectionMethod;
+use think\annotation\route\Resource;
 use think\App;
 use think\event\RouteLoaded;
 use think\Request;
@@ -21,8 +22,6 @@ trait InteractsWithRoute
      * @var \think\Route
      */
     protected $route;
-    
-    use InteractsWithRouteAnnotion;
     
     /**
      * 注册注解路由
@@ -54,39 +53,37 @@ trait InteractsWithRoute
             $routeMiddleware = [];
             $callback        = null;
 
-            //类
-            /** @var Resource $resource */
-            $this->setClassRouteResource($refClass,$class,$callback);
-
-            $this->setClassRouteMiddleware($refClass,$routeGroup,$routeMiddleware);
-
-            /** @var Group $group */
-            $this->setClassRouteGroup($refClass,$routeMiddleware,$routeGroup,$callback);
+            
+            foreach ($this->reader->getClassAnnotations($refClass) as $annotation){
+                $handleName = basename(str_replace('\\','/',get_class($annotation)));
+                if (class_exists('think\annotation\handler\\'.$handleName)){
+                    $handleClass = 'think\annotation\handler\\'.$handleName;
+                    (new $handleClass())->handleClass($class, $annotation, $this->route);
+                }elseif (class_exists('app\annotation\handler\\'.$handleName)){
+                    $handleClass = 'app\annotation\handler\\'.$handleName;
+                    (new $handleClass())->handleClass($class, $annotation, $this->route);
+                }elseif (isset($this->custom_annotation[get_class($annotation)])){
+                    (new $this->custom_annotation[get_class($annotation)]())->handleClass($class, $annotation, $this->route);
+                }
+                
+            }
 
             //方法
             foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $refMethod) {
 
-                /** @var Route $route */
-                if ($route = $this->reader->getMethodAnnotation($refMethod, Route::class)) {
-
-                   $rule = $this->setMethodRoute($route,$refMethod,$routeGroup,$class);
-                    
-                   $this->setMethodRouteMiddleware($refMethod,$rule);
-                   
-                   $this->setMethodRouteGroup($refMethod,$rule);
-
-                   $this->setMethodRouteModel($refMethod,$rule);
-
-                   $this->setMethodRouteValidate($refMethod,$rule);
-
-                   $this->setMethodRouteParamValidate($refMethod);
-                   
-                   $this->setMethodRbac($refMethod);
-
-                   $this->setMethodLogger($refMethod);
-
-                   $this->setMethodJwt($refMethod);
+                foreach ($this->reader->getMethodAnnotations($refMethod) as $annotation){
+                    $handleName = basename(str_replace('\\','/',get_class($annotation)));
+                    if (class_exists('think\annotation\Route\\'.$handleName)){
+                        $handleClass = 'think\annotation\handler\\'.$handleName;
+                        (new $handleClass())->handleMethod($refMethod,$annotation, $this->route);
+                    }elseif (class_exists('app\annotation\handler\\'.$handleName)){
+                        $handleClass = 'app\annotation\handler\\'.$handleName;
+                        (new $handleClass())->handleMethod($refMethod,$annotation, $this->route);
+                    }elseif (isset($this->custom_annotation[get_class($annotation)])){
+                        (new $this->custom_annotation[get_class($annotation)]())->handleMethods($refMethod,$annotation, $this->route);
+                    }
                 }
+
             }
         }
     }
