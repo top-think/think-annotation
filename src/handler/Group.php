@@ -8,13 +8,12 @@ use Doctrine\Common\Annotations\Annotation;
 
 class Group extends Handler
 {
-    public function handleClass(string $class, Annotation $annotation, \think\Route &$route)
+    public function cls(string $class, Annotation $annotation, \think\Route &$route)
     {
-        // TODO: Implement handleClass() method.
         $route->group($annotation->value)->option($annotation->getOptions());
     }
 
-    public function handleMethod(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
+    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
     {
         // TODO: Implement handleMethod() method.
         $route->group($annotation->value);

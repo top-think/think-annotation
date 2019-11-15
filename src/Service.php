@@ -15,7 +15,19 @@ class Service extends \think\Service
     protected $reader;
 
     /** @var array */
-    protected $custom_annotation = [];
+    protected $annotation = [];
+
+    /** @var string */
+    protected $think = [
+        'annotation' => 'think\annotation\Route\\',
+        'handler' => 'think\annotation\handler\\',
+    ];
+
+    /** @var string */
+    protected $custom = [
+        'annotation' => 'app\annotation\\',
+        'handler' => 'app\annotation\handler\\'
+    ];
 
     public function register()
     {
@@ -36,7 +48,7 @@ class Service extends \think\Service
     }
 
     protected function setCustomAnnotation(){
-        $this->custom_annotation = config('annotation.custom');
+        $this->annotation = config('annotation.custom');
     }
 
     /**

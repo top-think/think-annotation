@@ -8,13 +8,13 @@ use Doctrine\Common\Annotations\Annotation;
 
 class Model extends Handler
 {
-    public function handleClass(string $class, Annotation $annotation, \think\Route &$route)
+    public function cls(string $class, Annotation $annotation, \think\Route &$route)
     {
         // TODO: Implement handleClass() method.
     }
 
 
-    public function handleMethod(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
+    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
     {
         // TODO: Implement handleMethod() method.
         $route->model($annotation->var, $annotation->value, $annotation->exception);
