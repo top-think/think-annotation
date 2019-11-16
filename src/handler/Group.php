@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation;
 
 class Group extends Handler
 {
-    public function cls(string $class, Annotation $annotation, \think\Route &$route)
+    public function cls(\ReflectionClass $refClass, Annotation $annotation, \think\Route &$route)
     {
         $route->group($annotation->value)->option($annotation->getOptions());
     }

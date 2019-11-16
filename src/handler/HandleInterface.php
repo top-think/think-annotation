@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation;
 
 interface HandleInterface
 {
-    public function cls(string $class,Annotation $annotation,\think\Route &$route);
+    public function cls(\ReflectionClass $refClass,Annotation $annotation,\think\Route &$route);
 
     public function func(\ReflectionMethod $refMethod,Annotation $annotation,\think\Route &$route);
 }

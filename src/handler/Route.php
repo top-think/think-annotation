@@ -8,11 +8,6 @@ use Doctrine\Common\Annotations\Annotation;
 
 class Route extends Handler
 {
-    public function cls(string $class, Annotation $annotation, \think\Route &$route)
-    {
-        // TODO: Implement handleClass() method.
-    }
-
 
     public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
     {

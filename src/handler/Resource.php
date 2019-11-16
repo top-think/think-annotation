@@ -8,14 +8,9 @@ use Doctrine\Common\Annotations\Annotation;
 
 class Resource extends Handler
 {
-    public function cls(string $class, Annotation $annotation, \think\Route &$route)
+    public function cls(\ReflectionClass $refClass, Annotation $annotation, \think\Route &$route)
     {
-        // TODO: Implement handleClass() method.
-        $route->resource($annotation->value, $class)->option($annotation->getOptions());
+        $route->resource($annotation->value, $refClass->name)->option($annotation->getOptions());
     }
 
-    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
-    {
-        // TODO: Implement handleMethod() method.
-    }
 }

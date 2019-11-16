@@ -10,9 +10,8 @@ class Middleware extends Handler
 {
     protected $middleware = [];
 
-    public function cls(string $class, Annotation $annotation, \think\Route &$route)
+    public function cls(\ReflectionClass $refClass, Annotation $annotation, \think\Route &$route)
     {
-        // TODO: Implement handleClass() method.
         array_push($this->middleware,$annotation->value);
     }
 

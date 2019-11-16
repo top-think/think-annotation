@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation;
 
 abstract class Handler implements HandleInterface
 {
-    public function cls(string $class, Annotation $annotation, \think\Route &$route)
+    public function cls(\ReflectionClass $refClass, Annotation $annotation, \think\Route &$route)
     {
         // TODO: Implement cls() method.
     }
@@ -29,4 +29,5 @@ abstract class Handler implements HandleInterface
         $ruleController = $refMethod->class.'@'.$refMethod->name;
         return isset($rule[$ruleController]) ? true : false;
     }
+
 }
