@@ -6,12 +6,11 @@ namespace think\annotation\handler;
 
 use Doctrine\Common\Annotations\Annotation;
 
-class Route extends Handler
+final class Route extends Handler
 {
 
-    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
+    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\route\RuleItem &$rule)
     {
-        // TODO: Implement handleMethod() method.
-        $route->addRule($annotation->value, "{$refMethod->class}@{$refMethod->name}", $annotation->method)->option($annotation->getOptions());
+        $rule->addRule($annotation->value, "{$refMethod->class}@{$refMethod->name}", $annotation->method)->option($annotation->getOptions());
     }
 }

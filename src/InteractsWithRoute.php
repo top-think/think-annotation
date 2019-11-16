@@ -4,7 +4,6 @@ namespace think\annotation;
 
 use Doctrine\Common\Annotations\Reader;
 use ReflectionMethod;
-use think\annotation\route\Resource;
 use think\annotation\route\Route;
 use think\App;
 use think\event\RouteLoaded;
@@ -51,7 +50,14 @@ trait InteractsWithRoute
         foreach ($this->findClasses($dir) as $class) {
             $refClass = new \ReflectionClass($class);
             $this->setClassAnnotations($refClass);
-            $this->setMethodAnnotations($refClass);
+            foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $refMethod) {
+                if ($route = $this->reader->getMethodAnnotation($refMethod, Route::class)) {
+                    $rule = $this->route->addRule($route->value, "{$class}@{$refMethod->getName()}", $route->method);
+                    $rule->option($route->getOptions());
+                    $annotations = $this->reader->getMethodAnnotations($refMethod);
+                    $this->setMethodAnnotations($refMethod,$annotations,$rule);
+                }
+            }
         }
     }
 
@@ -59,7 +65,6 @@ trait InteractsWithRoute
     {
         // 类
         $annotations = $this->reader->getClassAnnotations($refClass);
-        $class = null;
         foreach ($annotations as $annotation) {
             $cls_name = basename(str_replace('\\', '/', get_class($annotation)));
             if (class_exists($this->think['annotation'] . $cls_name)) {
@@ -68,38 +73,30 @@ trait InteractsWithRoute
                 $class = $this->custom['handler'] . $cls_name;
             } elseif (isset($this->annotation[get_class($annotation)])) {
                 $class = $this->annotation[get_class($annotation)];
+            }else{
+                return ;
             }
-            if ($object = new $class()){
-                if (method_exists($object,'cls')){
-                    $object->cls($refClass, $annotation, $this->route);
-                }
-            }
+            (new $class())->cls($refClass, $annotation, $this->route);
         }
     }
 
-    protected function setMethodAnnotations(\ReflectionClass $refClass)
+    protected function setMethodAnnotations($refMethod,$annotations,$rule)
     {
         //方法
-        $annotations = null;
-        $class = null;
-        foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $refMethod) {
-            $annotations = $this->reader->getMethodAnnotations($refMethod);
-            if ($this->reader->getMethodAnnotation($refMethod, Route::class)) {
-                foreach ($annotations as $annotation) {
-                    $class = get_class($annotation);
-                    $cls_name = basename(str_replace('\\', '/',$class));
-                    if (class_exists($this->think['annotation'] . $cls_name)) {
-                        $class = $this->think['handler'] . $cls_name;
-                        (new $class)->func($refMethod, $annotation, $this->route);
-                    } elseif (class_exists($this->custom['annotation'] . $cls_name)) {
-                        $class = $this->custom['handler'] . $cls_name;
-                        (new $class)->func($refMethod, $annotation, $this->route);
-                    } elseif (isset($this->annotation[$class])) {
-                        $class = $this->annotation[$class];
-                        (new $class)->func($refMethod, $annotation, $this->route);
-                    }
-                }
+        foreach ($annotations as $annotation) {
+            if ($annotation instanceof Route) continue ;
+            $class = get_class($annotation);
+            $cls_name = basename(str_replace('\\', '/',$class));
+            if (class_exists($this->think['annotation'] . $cls_name)) {
+                $class = $this->think['handler'] . $cls_name;
+            } elseif (class_exists($this->custom['annotation'] . $cls_name)) {
+                $class = $this->custom['handler'] . $cls_name;
+            } elseif (isset($this->annotation[$class])) {
+                $class = $this->annotation[$class];
+            }else{
+                return ;
             }
+            (new $class())->func($refMethod, $annotation, $rule);
         }
     }
 

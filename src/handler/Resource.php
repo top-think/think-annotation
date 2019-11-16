@@ -6,11 +6,10 @@ namespace think\annotation\handler;
 
 use Doctrine\Common\Annotations\Annotation;
 
-class Resource extends Handler
+final class Resource extends Handler
 {
     public function cls(\ReflectionClass $refClass, Annotation $annotation, \think\Route &$route)
     {
         $route->resource($annotation->value, $refClass->name)->option($annotation->getOptions());
     }
-
 }

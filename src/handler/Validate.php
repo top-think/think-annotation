@@ -6,11 +6,11 @@ namespace think\annotation\handler;
 
 use Doctrine\Common\Annotations\Annotation;
 
-class Validate extends Handler
+final class Validate extends Handler
 {
-    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
+
+    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\route\RuleItem &$rule)
     {
-        // TODO: Implement handleMethod() method.
-        $route->validate($annotation->value, $annotation->scene, $annotation->message, $annotation->batch);
+        $rule->validate($annotation->value, $annotation->scene, $annotation->message, $annotation->batch);
     }
 }

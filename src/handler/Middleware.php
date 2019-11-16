@@ -6,7 +6,7 @@ namespace think\annotation\handler;
 
 use Doctrine\Common\Annotations\Annotation;
 
-class Middleware extends Handler
+final class Middleware extends Handler
 {
     protected $middleware = [];
 
@@ -15,10 +15,9 @@ class Middleware extends Handler
         array_push($this->middleware,$annotation->value);
     }
 
-    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
+    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\route\RuleItem &$rule)
     {
-        // TODO: Implement handleMethod() method.
         array_push($this->middleware,$annotation->value);
-        $route->middleware($this->middleware);
+        $rule->middleware($this->middleware);
     }
 }

@@ -13,7 +13,7 @@ abstract class Handler implements HandleInterface
         // TODO: Implement cls() method.
     }
 
-    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\Route &$route)
+    public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\route\RuleItem &$rule)
     {
         // TODO: Implement func() method.
     }

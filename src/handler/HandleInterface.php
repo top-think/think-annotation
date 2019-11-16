@@ -10,5 +10,5 @@ interface HandleInterface
 {
     public function cls(\ReflectionClass $refClass,Annotation $annotation,\think\Route &$route);
 
-    public function func(\ReflectionMethod $refMethod,Annotation $annotation,\think\Route &$route);
+    public function func(\ReflectionMethod $refMethod,Annotation $annotation,\think\route\RuleItem &$rule);
 }
