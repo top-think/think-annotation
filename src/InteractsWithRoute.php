@@ -3,11 +3,9 @@
 namespace think\annotation;
 
 use Doctrine\Common\Annotations\Reader;
-use ReflectionMethod;
 use think\annotation\route\Route;
 use think\App;
 use think\event\RouteLoaded;
-use think\Request;
 
 /**
  * Trait InteractsWithRoute
@@ -98,15 +96,6 @@ trait InteractsWithRoute
             }
             (new $class())->func($refMethod, $annotation, $rule);
         }
-    }
-
-    protected function getMethodAnnotations(ReflectionMethod $method, $annotationName)
-    {
-        $annotations = $this->reader->getMethodAnnotations($method);
-
-        return array_filter($annotations, function ($annotation) use ($annotationName) {
-            return $annotation instanceof $annotationName;
-        });
     }
 
 }
