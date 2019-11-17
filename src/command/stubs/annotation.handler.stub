@@ -1,20 +1,20 @@
 <?php
-/** Created by 嗝嗝<china_wangyu@aliyun.com>. Date: 2019-11-14  */
+declare (strict_types = 1);
 
-namespace think\annotation\handler;
-
+namespace {%namespace%};
 
 use Doctrine\Common\Annotations\Annotation;
+use think\annotation\handler\Handler;
 
-abstract class Handler implements HandleInterface
+class {%className%} extends Handler
 {
     public function cls(\ReflectionClass $refClass, Annotation $annotation, \think\Route &$route)
     {
-        // TODO: Implement cls() method.
+        // TODO: 完成类注解的操作
     }
 
     public function func(\ReflectionMethod $refMethod, Annotation $annotation, \think\route\RuleItem &$rule)
     {
-        // TODO: Implement func() method.
+        // TODO: 完成方法注解的操作
     }
 }
