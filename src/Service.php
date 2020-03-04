@@ -5,6 +5,12 @@ namespace think\annotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Annotations\Reader;
+use InvalidArgumentException;
+use RecursiveCallbackFilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
+use think\App;
 
 class Service extends \think\Service
 {
@@ -20,7 +26,15 @@ class Service extends \think\Service
         // TODO: this method is deprecated and will be removed in doctrine/annotations 2.0
         AnnotationRegistry::registerLoader('class_exists');
 
-        $this->reader = new CachedReader(new AnnotationReader(), $this->app);
+        $this->app->bind(Reader::class, function (App $app) {
+            return new CachedReader(new AnnotationReader(), $app);
+        });
+    }
+
+    public function boot(Reader $reader)
+    {
+        $this->reader = $reader;
+
         //注解路由
         $this->registerAnnotationRoute();
 
@@ -35,17 +49,17 @@ class Service extends \think\Service
      */
     protected function findClasses($dir)
     {
-        $files = iterator_to_array(new \RecursiveIteratorIterator(
-            new \RecursiveCallbackFilterIterator(
-                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS),
-                function (\SplFileInfo $current) {
+        $files = iterator_to_array(new RecursiveIteratorIterator(
+            new RecursiveCallbackFilterIterator(
+                new RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS),
+                function (SplFileInfo $current) {
                     return '.' !== substr($current->getBasename(), 0, 1);
                 }
             ),
-            \RecursiveIteratorIterator::LEAVES_ONLY
+            RecursiveIteratorIterator::LEAVES_ONLY
         ));
 
-        usort($files, function (\SplFileInfo $a, \SplFileInfo $b) {
+        usort($files, function (SplFileInfo $a, SplFileInfo $b) {
             return (string) $a > (string) $b ? 1 : -1;
         });
 
@@ -64,8 +78,8 @@ class Service extends \think\Service
         $class     = false;
         $namespace = false;
         $tokens    = token_get_all(file_get_contents($file));
-        if (1 === \count($tokens) && T_INLINE_HTML === $tokens[0][0]) {
-            throw new \InvalidArgumentException(sprintf('The file "%s" does not contain PHP code. Did you forgot to add the "<?php" start tag at the beginning of the file?', $file));
+        if (1 === count($tokens) && T_INLINE_HTML === $tokens[0][0]) {
+            throw new InvalidArgumentException(sprintf('The file "%s" does not contain PHP code. Did you forgot to add the "<?php" start tag at the beginning of the file?', $file));
         }
         for ($i = 0; isset($tokens[$i]); ++$i) {
             $token = $tokens[$i];

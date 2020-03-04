@@ -8,7 +8,6 @@
             "email": "448901948@qq.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "topthink/framework": "^6.0",
         "doctrine/annotations": "^1.6",

@@ -10,7 +10,9 @@
 
 ## 使用方法
 
-~~~
+### 路由注解
+
+~~~php
 <?php
 
 namespace app\controller;
@@ -54,6 +56,28 @@ class IndexController
 
 }
 
+~~~
+
+### 模型注解
+
+~~~php
+<?php
+
+namespace app\model;
+
+use think\Model;
+use think\annotation\model\InteractsWithAnnotations;
+use think\annotation\model\relation\HasMany;
+
+/**
+ * @HasMany("articles", model=Article::class, foreignKey="user_id")
+ */
+class User extends Model
+{
+    use InteractsWithAnnotations;
+
+    //...
+}
 ~~~
 
 IDE Support
