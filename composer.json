@@ -11,7 +11,11 @@
     "require": {
         "topthink/framework": "^6.0",
         "doctrine/annotations": "^1.6",
-        "php-di/phpdoc-reader": "^2.1"
+        "php-di/phpdoc-reader": "^2.1",
+        "symfony/class-loader": "~3.2.0"
+    },
+    "require-dev": {
+        "topthink/think-ide-helper": "dev-master"
     },
     "autoload": {
         "psr-4": {

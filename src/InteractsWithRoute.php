@@ -3,7 +3,9 @@
 namespace think\annotation;
 
 use Doctrine\Common\Annotations\Reader;
+use ReflectionClass;
 use ReflectionMethod;
+use Symfony\Component\ClassLoader\ClassMapGenerator;
 use think\annotation\route\Group;
 use think\annotation\route\Middleware;
 use think\annotation\route\Model;
@@ -15,7 +17,7 @@ use think\event\RouteLoaded;
 /**
  * Trait InteractsWithRoute
  * @package think\annotation\traits
- * @property App    $app
+ * @property App $app
  * @property Reader $reader
  */
 trait InteractsWithRoute
@@ -36,7 +38,7 @@ trait InteractsWithRoute
                 $this->route = $this->app->route;
 
                 $dirs = [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
-                 + $this->app->config->get('annotation.route.controllers', []);
+                    + $this->app->config->get('annotation.route.controllers', []);
 
                 foreach ($dirs as $dir) {
                     if (is_dir($dir)) {
@@ -49,8 +51,8 @@ trait InteractsWithRoute
 
     protected function scanDir($dir)
     {
-        foreach ($this->findClasses($dir) as $class) {
-            $refClass        = new \ReflectionClass($class);
+        foreach (ClassMapGenerator::createMap($dir) as $class) {
+            $refClass        = new ReflectionClass($class);
             $routeGroup      = false;
             $routeMiddleware = [];
             $callback        = null;
