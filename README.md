@@ -66,7 +66,6 @@ class IndexController
 namespace app\model;
 
 use think\Model;
-use think\annotation\model\InteractsWithAnnotations;
 use think\annotation\model\relation\HasMany;
 
 /**
@@ -74,7 +73,6 @@ use think\annotation\model\relation\HasMany;
  */
 class User extends Model
 {
-    use InteractsWithAnnotations;
 
     //...
 }

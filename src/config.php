@@ -9,5 +9,8 @@ return [
         'enable'      => true,
         'controllers' => [],
     ],
+    'model'  => [
+        'enable' => true,
+    ],
     'ignore' => [],
 ];
