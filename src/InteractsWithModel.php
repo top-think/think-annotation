@@ -152,6 +152,7 @@ trait InteractsWithModel
 
                         if (!empty($relation)) {
                             call_user_func([$model, 'macro'], $annotation->value, $relation);
+                            unset($relation);
                         }
                     }
 
