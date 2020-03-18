@@ -2,6 +2,7 @@
 
 namespace think\annotation;
 
+use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\Annotations\Reader;
 use ReflectionClass;
 use think\annotation\model\relation\BelongsTo;
@@ -16,6 +17,7 @@ use think\annotation\model\relation\MorphOne;
 use think\annotation\model\relation\MorphTo;
 use think\annotation\model\relation\MorphToMany;
 use think\App;
+use think\helper\Str;
 use think\ide\ModelGenerator;
 use think\Model;
 use think\model\Collection;
@@ -159,50 +161,52 @@ trait InteractsWithModel
 
             $this->app->event->listen(ModelGenerator::class, function (ModelGenerator $generator) {
 
+                /** @var Annotation[] $annotations */
                 $annotations = $this->reader->getClassAnnotations($generator->getReflection());
 
                 foreach ($annotations as $annotation) {
+                    $property = Str::snake($annotation->value);
                     switch (true) {
                         case $annotation instanceof HasOne:
                             $generator->addMethod($annotation->value, \think\model\relation\HasOne::class, [], '');
-                            $generator->addProperty($annotation->value, $annotation->model, true);
+                            $generator->addProperty($property, $annotation->model, true);
                             break;
                         case $annotation instanceof BelongsTo:
                             $generator->addMethod($annotation->value, \think\model\relation\BelongsTo::class, [], '');
-                            $generator->addProperty($annotation->value, $annotation->model, true);
+                            $generator->addProperty($property, $annotation->model, true);
                             break;
                         case $annotation instanceof HasMany:
                             $generator->addMethod($annotation->value, \think\model\relation\HasMany::class, [], '');
-                            $generator->addProperty($annotation->value, $annotation->model . '[]', true);
+                            $generator->addProperty($property, $annotation->model . '[]', true);
                             break;
                         case $annotation instanceof HasManyThrough:
                             $generator->addMethod($annotation->value, \think\model\relation\HasManyThrough::class, [], '');
-                            $generator->addProperty($annotation->value, $annotation->model . '[]', true);
+                            $generator->addProperty($property, $annotation->model . '[]', true);
                             break;
                         case $annotation instanceof HasOneThrough:
                             $generator->addMethod($annotation->value, \think\model\relation\HasOneThrough::class, [], '');
-                            $generator->addProperty($annotation->value, $annotation->model, true);
+                            $generator->addProperty($property, $annotation->model, true);
                             break;
                         case $annotation instanceof BelongsToMany:
                             $generator->addMethod($annotation->value, \think\model\relation\BelongsToMany::class, [], '');
-                            $generator->addProperty($annotation->value, $annotation->model . '[]', true);
+                            $generator->addProperty($property, $annotation->model . '[]', true);
                             break;
                         case $annotation instanceof MorphOne:
                             $generator->addMethod($annotation->value, \think\model\relation\MorphOne::class, [], '');
-                            $generator->addProperty($annotation->value, $annotation->model, true);
+                            $generator->addProperty($property, $annotation->model, true);
                             break;
                         case $annotation instanceof MorphMany:
                             $generator->addMethod($annotation->value, \think\model\relation\MorphMany::class, [], '');
-                            $generator->addProperty($annotation->value, 'mixed', true);
+                            $generator->addProperty($property, 'mixed', true);
                             break;
                         case $annotation instanceof MorphTo:
                             $generator->addMethod($annotation->value, \think\model\relation\MorphTo::class, [], '');
-                            $generator->addProperty($annotation->value, 'mixed', true);
+                            $generator->addProperty($property, 'mixed', true);
                             break;
                         case $annotation instanceof MorphToMany:
                         case $annotation instanceof MorphByMany:
                             $generator->addMethod($annotation->value, \think\model\relation\MorphToMany::class, [], '');
-                            $generator->addProperty($annotation->value, Collection::class, true);
+                            $generator->addProperty($property, Collection::class, true);
                             break;
                     }
                 }
