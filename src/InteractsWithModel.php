@@ -47,7 +47,7 @@ trait InteractsWithModel
                         switch (true) {
                             case $annotation instanceof HasOne:
                                 $relation = function () use ($annotation) {
-                                    return $this->hasOneThrough(
+                                    return $this->hasOne(
                                         $annotation->model,
                                         $annotation->foreignKey,
                                         $annotation->localKey
