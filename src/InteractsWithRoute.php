@@ -51,7 +51,7 @@ trait InteractsWithRoute
 
     protected function scanDir($dir)
     {
-        foreach (ClassMapGenerator::createMap($dir) as $class=>$path) {
+        foreach (ClassMapGenerator::createMap($dir) as $class => $path) {
             $refClass        = new ReflectionClass($class);
             $routeGroup      = false;
             $routeMiddleware = [];
