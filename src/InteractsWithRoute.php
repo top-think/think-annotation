@@ -104,13 +104,19 @@ trait InteractsWithRoute
 
                     //中间件
                     if ($middleware = $this->reader->getMethodAnnotation($refMethod, Middleware::class)) {
-                        $rule->middleware($middleware->value);
+                        $routeMiddleware=array_merge($routeMiddleware,$middleware->value);
                     }
+                    
+                    //绑定中间件，技持绑定多个
+                    if(!empty($routeMiddleware)){
+                        $rule->middleware($routeMiddleware);
+                    }
+                    
                     //设置分组别名
                     if ($group = $this->reader->getMethodAnnotation($refMethod, Group::class)) {
                         $rule->group($group->value);
                     }
-
+                
                     //绑定模型,支持多个
                     if (!empty($models = $this->getMethodAnnotations($refMethod, Model::class))) {
                         /** @var Model $model */
