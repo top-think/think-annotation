@@ -37,8 +37,7 @@ trait InteractsWithRoute
 
                 $this->route = $this->app->route;
 
-                $dirs = [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
-                    + $this->app->config->get('annotation.route.controllers', []);
+                $dirs = array_merge([$this->app->getAppPath() . $this->app->config->get('route.controller_layer')], $this->app->config->get('annotation.route.controllers', []));
 
                 foreach ($dirs as $dir) {
                     if (is_dir($dir)) {

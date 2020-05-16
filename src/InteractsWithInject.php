@@ -71,7 +71,7 @@ trait InteractsWithInject
 
     protected function isInjectClass($name)
     {
-        $namespaces = ['app\\'] + $this->app->config->get('annotation.inject.namespaces', []);
+        $namespaces = array_merge(['app\\'], $this->app->config->get('annotation.inject.namespaces', []));
 
         foreach ($namespaces as $namespace) {
             $namespace = rtrim($namespace, '\\') . '\\';
