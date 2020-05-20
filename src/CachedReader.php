@@ -33,7 +33,21 @@ class CachedReader implements Reader
     {
         $this->delegate = $reader;
 
-        $this->cache = $app->cache->store();
+        $stores = $app->config->get('cache.stores', []);
+
+        $store = uniqid();
+
+        $stores[$store] = [
+            'type'         => 'file',
+            'cache_subdir' => false,
+            'path'         => $app->getRuntimePath() . 'annotations',
+        ];
+
+        $app->config->set([
+            'stores' => $stores,
+        ], 'cache');
+
+        $this->cache = $app->cache->store($store);
 
         $this->debug = $app->isDebug();
     }
