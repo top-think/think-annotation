@@ -13,4 +13,5 @@ return [
         'enable' => true,
     ],
     'ignore' => [],
+    'store'  => null,//缓存store
 ];

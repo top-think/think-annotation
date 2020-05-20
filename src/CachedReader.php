@@ -3,9 +3,8 @@
 namespace think\annotation;
 
 use Doctrine\Common\Annotations\Reader;
+use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
-use think\App;
-use think\cache\Driver;
 
 class CachedReader implements Reader
 {
@@ -20,7 +19,7 @@ class CachedReader implements Reader
     private $loadedAnnotations = [];
 
     /**
-     * @var Driver
+     * @var CacheInterface
      */
     private $cache;
 
@@ -29,27 +28,11 @@ class CachedReader implements Reader
      */
     private $debug;
 
-    public function __construct(Reader $reader, App $app)
+    public function __construct(Reader $reader, CacheInterface $cache, $debug = false)
     {
         $this->delegate = $reader;
-
-        $stores = $app->config->get('cache.stores', []);
-
-        $store = uniqid();
-
-        $stores[$store] = [
-            'type'         => 'file',
-            'cache_subdir' => false,
-            'path'         => $app->getRuntimePath() . 'annotations',
-        ];
-
-        $app->config->set([
-            'stores' => $stores,
-        ], 'cache');
-
-        $this->cache = $app->cache->store($store);
-
-        $this->debug = $app->isDebug();
+        $this->cache    = $cache;
+        $this->debug    = $debug;
     }
 
     /**
