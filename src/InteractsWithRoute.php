@@ -38,7 +38,7 @@ trait InteractsWithRoute
                 $this->route = $this->app->route;
 
                 $dirs = [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
-                    + $this->app->config->get('annotation.route.controllers', []);
+                 + $this->app->config->get('annotation.route.controllers', []);
 
                 foreach ($dirs as $dir) {
                     if (is_dir($dir)) {
@@ -62,7 +62,9 @@ trait InteractsWithRoute
             if ($resource = $this->reader->getClassAnnotation($refClass, Resource::class)) {
                 //资源路由
                 $callback = function () use ($class, $resource) {
-                    $this->route->resource($resource->value, $class)
+                    $baseNamespace = $this->app->getNamespace() . '\\' . $this->app->config->get('route.controller_layer');
+                    $route         = str_replace('\\', '.', substr($class, strlen($baseNamespace) + 1));
+                    $this->route->resource($resource->value, $route)
                         ->option($resource->getOptions());
                 };
             }
