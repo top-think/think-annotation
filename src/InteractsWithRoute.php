@@ -100,8 +100,6 @@ trait InteractsWithRoute
                     //注册路由
                     $rule = $routeGroup->addRule($route->value, "{$class}@{$refMethod->getName()}", $route->method);
 
-                    $rule->option($route->getOptions());
-
                     //中间件
                     if ($middleware = $this->reader->getMethodAnnotation($refMethod, Middleware::class)) {
                         $rule->middleware($middleware->value);
