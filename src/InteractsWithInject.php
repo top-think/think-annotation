@@ -10,7 +10,7 @@ use think\App;
 /**
  * Trait InteractsWithInject
  * @package think\annotation\traits
- * @property App    $app
+ * @property App $app
  * @property Reader $reader
  */
 trait InteractsWithInject
@@ -29,7 +29,7 @@ trait InteractsWithInject
     protected function autoInject()
     {
         if ($this->app->config->get('annotation.inject.enable', true)) {
-            $this->app->resolving(function ($object) {
+            $this->app->resolving(function ($object, $app) {
 
                 if ($this->isInjectClass(get_class($object))) {
 
@@ -42,12 +42,12 @@ trait InteractsWithInject
                             $annotation = $this->reader->getPropertyAnnotation($refProperty, Inject::class);
                             if ($annotation) {
                                 if ($annotation->value) {
-                                    $value = $this->app->make($annotation->value);
+                                    $value = $app->make($annotation->value);
                                 } else {
                                     //获取@var类名
                                     $propertyClass = $reader->getPropertyClass($refProperty);
                                     if ($propertyClass) {
-                                        $value = $this->app->make($propertyClass);
+                                        $value = $app->make($propertyClass);
                                     }
                                 }
 
@@ -62,7 +62,7 @@ trait InteractsWithInject
                     }
 
                     if ($refObject->hasMethod('__injected')) {
-                        $this->app->invokeMethod([$object, '__injected']);
+                        $app->invokeMethod([$object, '__injected']);
                     }
                 }
             });
