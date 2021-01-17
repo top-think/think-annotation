@@ -2,14 +2,12 @@
 
 namespace think\annotation\route;
 
-use Doctrine\Common\Annotations\Annotation;
+use Attribute;
 
 /**
  * 路由分组
- * @package think\annotation\route
- * @Annotation
- * @Target({"CLASS","METHOD"})
  */
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 final class Group extends Rule
 {
 

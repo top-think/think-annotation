@@ -2,28 +2,26 @@
 
 namespace think\annotation\route;
 
-use Doctrine\Common\Annotations\Annotation;
+use Attribute;
 
 /**
  * Class Validate
- * @package think\annotation\route
- * @Annotation
- * @Annotation\Target({"METHOD"})
  */
-final class Validate extends Annotation
+#[Attribute(Attribute::TARGET_METHOD)]
+final class Validate
 {
     /**
      * @var string
      */
-    public $scene;
+    public string $scene;
 
     /**
      * @var array
      */
-    public $message = [];
+    public array $message = [];
 
     /**
      * @var bool
      */
-    public $batch = true;
+    public bool $batch = true;
 }

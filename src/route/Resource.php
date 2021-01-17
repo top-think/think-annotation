@@ -2,15 +2,12 @@
 
 namespace think\annotation\route;
 
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
+use Attribute;
 
 /**
  * 注册资源路由
- * @package think\annotation\route
- * @Annotation
- * @Target({"CLASS"})
  */
+#[Attribute(Attribute::TARGET_CLASS)]
 final class Resource extends Rule
 {
 

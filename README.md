@@ -1,5 +1,7 @@
 # think-annotation for ThinkPHP6
 
+> PHP8版本
+
 ## 安装
 
 > composer require topthink/think-annotation
@@ -10,7 +12,7 @@
 
 ## 使用方法
 
-### 路由注解
+### 路由注解(尚未实现)
 
 ~~~php
 <?php
@@ -25,21 +27,14 @@ use think\annotation\route\Resource;
 use think\Cache;
 use think\middleware\SessionInit;
 
-/**
- * Class IndexController
- * @package app\controller
- * @Group("bb")
- * @Resource("aa")
- * @Middleware({SessionInit::class})
- */
+#[Group("bb")]
+#[Resource("aa")]
+#[Middleware([SessionInit::class])]
 class IndexController
 {
 
-    /**
-     * @Inject()
-     * @var Cache
-     */
-    protected $cache;
+    #[Inject]
+    protected Cache $cache;
 
     public function index()
     {
@@ -68,9 +63,7 @@ namespace app\model;
 use think\Model;
 use think\annotation\model\relation\HasMany;
 
-/**
- * @HasMany("articles", model=Article::class, foreignKey="user_id")
- */
+#[HasMany("articles", Article::class, "user_id")]
 class User extends Model
 {
 
@@ -78,11 +71,4 @@ class User extends Model
 }
 ~~~
 
-IDE Support
------------
-
-Some IDEs already provide support for annotations:
-
-- Eclipse via the Symfony2 Plugin <http://symfony.dubture.com/>
-- PHPStorm via the PHP Annotations Plugin <http://plugins.jetbrains.com/plugin/7320> or the Symfony2 Plugin <http://plugins.jetbrains.com/plugin/7219>
 

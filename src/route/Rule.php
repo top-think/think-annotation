@@ -2,70 +2,68 @@
 
 namespace think\annotation\route;
 
-use Doctrine\Common\Annotations\Annotation;
-
-abstract class Rule extends Annotation
+abstract class Rule
 {
     /**
      * @var string|array
      */
-    public $middleware;
+    public array|string $middleware;
 
     /**
      * 后缀
      * @var string
      */
-    public $ext;
+    public string $ext;
 
     /**
      * @var string
      */
-    public $deny_ext;
+    public string $denyExt;
 
     /**
      * @var bool
      */
-    public $https;
+    public bool $https;
 
     /**
      * @var string
      */
-    public $domain;
+    public string $domain;
 
     /**
      * @var bool
      */
-    public $complete_match;
+    public bool $completeMatch;
 
     /**
      * @var string|array
      */
-    public $cache;
+    public array|string $cache;
 
     /**
      * @var bool
      */
-    public $ajax;
+    public bool $ajax;
 
     /**
      * @var bool
      */
-    public $pjax;
+    public bool $pjax;
 
     /**
      * @var bool
      */
-    public $json;
+    public bool $json;
 
     /**
      * @var array
      */
-    public $filter;
+    public array $filter;
 
     /**
      * @var array
      */
-    public $append;
+    public array $append;
 
     public function getOptions()
     {

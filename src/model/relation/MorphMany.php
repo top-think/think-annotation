@@ -2,27 +2,25 @@
 
 namespace think\annotation\model\relation;
 
-use Doctrine\Common\Annotations\Annotation;
+use Attribute;
 
-/**
- * @Annotation
- * @Annotation\Target({"CLASS"})
- */
-final class MorphMany extends Annotation
+#[Attribute(Attribute::TARGET_CLASS)]
+final class MorphMany
 {
     /**
-     * @var string
-     * @Annotation\Required
+     * MORPH  MANY 关联定义
+     * @param string $name 关联名
+     * @param string $model 模型名
+     * @param string|array $morph 多态字段信息
+     * @param string $type 多态类型
      */
-    public $model;
-
-    /**
-     * @var string|array
-     */
-    public $morph = null;
-
-    /**
-     * @var string
-     */
-    public $type = '';
+    public function __construct(
+        public string $name,
+        public string $model,
+        public $morph = null,
+        public string $type = ''
+    )
+    {
+        $this->morph = $morph ?? $name;
+    }
 }

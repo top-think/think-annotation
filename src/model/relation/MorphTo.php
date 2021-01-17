@@ -2,21 +2,23 @@
 
 namespace think\annotation\model\relation;
 
-use Doctrine\Common\Annotations\Annotation;
+use Attribute;
 
-/**
- * @Annotation
- * @Annotation\Target({"CLASS"})
- */
-final class MorphTo extends Annotation
+#[Attribute(Attribute::TARGET_CLASS)]
+final class MorphTo
 {
     /**
-     * @var string|array
+     * MORPH TO 关联定义
+     * @param string $name 关联名
+     * @param null $morph 多态字段信息
+     * @param array $alias 多态别名定义
      */
-    public $morph = null;
-
-    /**
-     * @var array
-     */
-    public $alias = [];
+    public function __construct(
+        public string $name,
+        public $morph = null,
+        public array $alias = []
+    )
+    {
+        $this->morph = $morph ?? $name;
+    }
 }

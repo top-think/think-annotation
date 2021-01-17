@@ -2,16 +2,13 @@
 
 namespace think\annotation\route;
 
-use Doctrine\Common\Annotations\Annotation;
-use Doctrine\Common\Annotations\Annotation\Target;
+use Attribute;
 
 /**
  * 路由中间件
- * @package think\annotation\route
- * @Annotation
- * @Target({"CLASS","METHOD"})
  */
-final class Middleware extends Annotation
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
+final class Middleware
 {
 
 }
