@@ -22,9 +22,14 @@ trait InteractsWithInject
                         if ($refProperty->isDefault() && !$refProperty->isStatic()) {
                             $attrs = $refProperty->getAttributes(Inject::class);
                             if (!empty($attrs)) {
-                                $type = $refProperty->getType();
-                                if ($type && !$type->isBuiltin()) {
-                                    $value = $app->make($type->getName());
+                                if (!empty($attrs[0]->getArguments()[0])) {
+                                    $type = $attrs[0]->getArguments()[0];
+                                } elseif ($refProperty->getType() && !$refProperty->getType()->isBuiltin()) {
+                                    $type = $refProperty->getType()->getName();
+                                }
+
+                                if (isset($type)) {
+                                    $value = $app->make($type);
                                     if (!$refProperty->isPublic()) {
                                         $refProperty->setAccessible(true);
                                     }
