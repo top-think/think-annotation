@@ -9,6 +9,7 @@
         }
     ],
     "require": {
+        "php": "^8.0",
         "topthink/framework": "^6.0",
         "symfony/class-loader": "~3.2.0"
     },
