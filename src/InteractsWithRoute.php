@@ -50,7 +50,8 @@ trait InteractsWithRoute
 
     protected function scanDir($dir)
     {
-        foreach (Constructs::fromDirectory($dir) as $class => $path) {
+        foreach (Constructs::fromDirectory($dir) as $construct) {
+            $class           = $construct->name();
             $refClass        = new ReflectionClass($class);
             $routeGroup      = false;
             $routeMiddleware = [];
