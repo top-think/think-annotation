@@ -4,11 +4,10 @@ namespace think\annotation\route;
 
 use Attribute;
 
-/**
- * 路由中间件
- */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class Middleware
 {
-
+    public function __construct(public $value)
+    {
+    }
 }

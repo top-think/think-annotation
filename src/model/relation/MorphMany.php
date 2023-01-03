@@ -3,9 +3,10 @@
 namespace think\annotation\model\relation;
 
 use Attribute;
+use think\annotation\model\Relation;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class MorphMany
+final class MorphMany extends Relation
 {
     /**
      * MORPH  MANY 关联定义
@@ -17,7 +18,7 @@ final class MorphMany
     public function __construct(
         public string $name,
         public string $model,
-        public $morph = null,
+        public        $morph = null,
         public string $type = ''
     )
     {

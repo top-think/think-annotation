@@ -3,9 +3,10 @@
 namespace think\annotation\model\relation;
 
 use Attribute;
+use think\annotation\model\Relation;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class HasMany
+final class HasMany extends Relation
 {
     /**
      * HAS MANY 关联定义

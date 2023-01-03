@@ -4,6 +4,7 @@ namespace think\annotation;
 
 use ReflectionClass;
 use ReflectionMethod;
+use think\annotation\model\Relation;
 use think\annotation\model\relation\BelongsTo;
 use think\annotation\model\relation\BelongsToMany;
 use think\annotation\model\relation\HasMany;
@@ -37,36 +38,25 @@ trait InteractsWithModel
         if ($this->app->config->get('annotation.model.enable', true)) {
 
             Model::maker(function (Model $model) {
-                $attrs     = [
-                    BelongsTo::class, BelongsToMany::class, HasMany::class, HasManyThrough::class, HasOne::class,
-                    HasOneThrough::class, MorphByMany::class, MorphMany::class, MorphOne::class, MorphTo::class,
-                    MorphToMany::class,
-                ];
                 $className = get_class($model);
                 if (!isset($this->detected[$className])) {
-
-                    $annotations = (new ReflectionClass($model))->getAttributes();
+                    $annotations = $this->reader->getAnnotations(new ReflectionClass($model), Relation::class);
 
                     foreach ($annotations as $annotation) {
-                        $name = $annotation->getName();
-                        if (in_array($name, $attrs)) {
 
-                            $attr = $annotation->newInstance();
+                        $relation = function () use ($annotation) {
 
-                            $relation = function () use ($attr) {
+                            $refMethod = new ReflectionMethod($this, Str::camel(class_basename($annotation)));
 
-                                $refMethod = new ReflectionMethod($this, Str::camel(class_basename($attr)));
+                            $args = [];
+                            foreach ($refMethod->getParameters() as $param) {
+                                $args[] = $annotation->{$param->getName()};
+                            }
 
-                                $args = [];
-                                foreach ($refMethod->getParameters() as $param) {
-                                    $args[] = $attr->{$param->getName()};
-                                }
+                            return $refMethod->invokeArgs($this, $args);
+                        };
 
-                                return $refMethod->invokeArgs($this, $args);
-                            };
-
-                            call_user_func([$model, 'macro'], $attr->name, $relation);
-                        }
+                        call_user_func([$model, 'macro'], $annotation->name, $relation);
                     }
 
                     $this->detected[$className] = true;
@@ -75,7 +65,7 @@ trait InteractsWithModel
 
             $this->app->event->listen(ModelGenerator::class, function (ModelGenerator $generator) {
 
-                $attrs = $generator->getReflection()->getAttributes();
+                $attrs = $this->reader->getAnnotations($generator->getReflection(), Relation::class);
 
                 foreach ($attrs as $attr) {
                     $annotation = $attr->newInstance();

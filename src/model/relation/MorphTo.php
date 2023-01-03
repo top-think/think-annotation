@@ -3,9 +3,10 @@
 namespace think\annotation\model\relation;
 
 use Attribute;
+use think\annotation\model\Relation;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class MorphTo
+final class MorphTo extends Relation
 {
     /**
      * MORPH TO 关联定义
@@ -15,8 +16,8 @@ final class MorphTo
      */
     public function __construct(
         public string $name,
-        public $morph = null,
-        public array $alias = []
+        public        $morph = null,
+        public array  $alias = []
     )
     {
         $this->morph = $morph ?? $name;

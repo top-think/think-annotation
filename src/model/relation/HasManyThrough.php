@@ -3,9 +3,10 @@
 namespace think\annotation\model\relation;
 
 use Attribute;
+use think\annotation\model\Relation;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class HasManyThrough
+final class HasManyThrough extends Relation
 {
     /**
      * HAS MANY 远程关联定义

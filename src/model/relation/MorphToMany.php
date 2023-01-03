@@ -3,9 +3,10 @@
 namespace think\annotation\model\relation;
 
 use Attribute;
+use think\annotation\model\Relation;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class MorphToMany
+final class MorphToMany extends Relation
 {
     /**
      * MORPH TO MANY关联定义
@@ -16,10 +17,10 @@ final class MorphToMany
      * @param ?string $localKey 当前模型关联键
      */
     public function __construct(
-        public string $name,
-        public string $model,
-        public string $middle,
-        public $morph = null,
+        public string  $name,
+        public string  $model,
+        public string  $middle,
+        public         $morph = null,
         public ?string $localKey = null
     )
     {

@@ -4,19 +4,10 @@ namespace think\annotation\route;
 
 use Attribute;
 
-/**
- * 注入模型
- */
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 final class Model
 {
-    /**
-     * @var string
-     */
-    public string $var = 'id';
-
-    /**
-     * @var boolean
-     */
-    public bool $exception = true;
+    public function __construct(public string $value, public string $var = 'id', public bool $exception = true)
+    {
+    }
 }

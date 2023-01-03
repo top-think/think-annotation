@@ -12,7 +12,7 @@
 
 ## 使用方法
 
-### 路由注解(尚未实现)
+### 路由注解
 
 ~~~php
 <?php
@@ -20,10 +20,10 @@
 namespace app\controller;
 
 use think\annotation\Inject;
-use think\annotation\Route;
 use think\annotation\route\Group;
 use think\annotation\route\Middleware;
 use think\annotation\route\Resource;
+use think\annotation\route\Route;
 use think\Cache;
 use think\middleware\SessionInit;
 
@@ -41,9 +41,7 @@ class IndexController
         //...
     }
 
-    /**
-     * @Route("xx")
-     */
+    #[Route('xx')]
     public function xx()
     {
         //...
