@@ -13,6 +13,7 @@ use think\annotation\route\Route;
 use think\annotation\route\Validate;
 use think\App;
 use think\event\RouteLoaded;
+use think\helper\Arr;
 
 /**
  * Trait InteractsWithRoute
@@ -26,9 +27,8 @@ trait InteractsWithRoute
      */
     protected $route;
 
-    /**
-     * 注册注解路由
-     */
+    protected $parsedClass = [];
+
     protected function registerAnnotationRoute()
     {
         if ($this->app->config->get('annotation.route.enable', true)) {
@@ -36,92 +36,104 @@ trait InteractsWithRoute
 
                 $this->route = $this->app->route;
 
-                $dirs = [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
-                    + $this->app->config->get('annotation.route.controllers', []);
+                $dirs = array_merge(
+                    $this->app->config->get('annotation.route.controllers', []),
+                    [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
+                );
 
-                foreach ($dirs as $dir) {
+                foreach ($dirs as $dir => $options) {
+                    if (is_numeric($dir)) {
+                        $dir     = $options;
+                        $options = [];
+                    }
+
                     if (is_dir($dir)) {
-                        $this->scanDir($dir);
+                        $this->scanDir($dir, $options);
                     }
                 }
             });
         }
     }
 
-    protected function scanDir($dir)
+    protected function scanDir($dir, $options = [])
     {
+        $groups = [];
         foreach (Constructs::fromDirectory($dir) as $construct) {
-            $class           = $construct->name();
-            $refClass        = new ReflectionClass($class);
-            $routeGroup      = false;
-            $routeMiddleware = [];
-            $callback        = null;
-
-            //类
-            if ($resource = $this->reader->getAnnotation($refClass, Resource::class)) {
-                //资源路由
-                $callback = function () use ($class, $resource) {
-                    $this->route->resource($resource->rule, $class)->option($resource->options);
-                };
+            $class = $construct->name();
+            if (in_array($class, $this->parsedClass)) {
+                continue;
             }
+            $this->parsedClass[] = $class;
 
-            if ($middleware = $this->reader->getAnnotation($refClass, Middleware::class)) {
-                $routeGroup      = '';
-                $routeMiddleware = $middleware->value;
-            }
+            $refClass = new ReflectionClass($class);
 
-            if ($group = $this->reader->getAnnotation($refClass, Group::class)) {
-                $routeGroup = $group->rule;
-            }
-
-            if (false !== $routeGroup) {
-                $routeGroup = $this->route->group($routeGroup, $callback);
-                if ($group) {
-                    $routeGroup->option($group->options);
-                }
-
-                $routeGroup->middleware($routeMiddleware);
-            } else {
-                if ($callback) {
-                    $callback();
-                }
-                $routeGroup = $this->route->getGroup();
-            }
-
+            $routes = [];
             //方法
             foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
+                if ($routeAnn = $this->reader->getAnnotation($refMethod, Route::class)) {
 
-                if ($route = $this->reader->getAnnotation($refMethod, Route::class)) {
+                    $routes[] = function () use ($routeAnn, $class, $refMethod) {
+                        //注册路由
+                        $rule = $this->route->rule($routeAnn->rule, "{$class}@{$refMethod->getName()}", $routeAnn->method);
 
-                    //注册路由
-                    $rule = $routeGroup->addRule($route->rule, "{$class}@{$refMethod->getName()}", $route->method);
+                        $rule->option($routeAnn->options);
 
-                    $rule->option($route->options);
-
-                    //中间件
-                    if ($middleware = $this->reader->getAnnotation($refMethod, Middleware::class)) {
-                        $rule->middleware($middleware->value);
-                    }
-
-                    //设置分组别名
-                    if ($group = $this->reader->getAnnotation($refMethod, Group::class)) {
-                        $rule->group($group->value);
-                    }
-
-                    //绑定模型,支持多个
-                    if (!empty($models = $this->reader->getAnnotations($refMethod, Model::class))) {
-                        /** @var Model $model */
-                        foreach ($models as $model) {
-                            $rule->model($model->var, $model->value, $model->exception);
+                        //中间件
+                        if ($middlewareAnn = $this->reader->getAnnotation($refMethod, Middleware::class)) {
+                            $rule->middleware($middlewareAnn->value);
                         }
-                    }
 
-                    //验证
-                    if ($validate = $this->reader->getAnnotation($refMethod, Validate::class)) {
-                        $rule->validate($validate->value, $validate->scene, $validate->message, $validate->batch);
-                    }
+                        //绑定模型,支持多个
+                        if (!empty($modelsAnn = $this->reader->getAnnotations($refMethod, Model::class))) {
+                            foreach ($modelsAnn as $modelAnn) {
+                                $rule->model($modelAnn->var, $modelAnn->value, $modelAnn->exception);
+                            }
+                        }
+
+                        //验证
+                        if ($validateAnn = $this->reader->getAnnotation($refMethod, Validate::class)) {
+                            $rule->validate($validateAnn->value, $validateAnn->scene, $validateAnn->message, $validateAnn->batch);
+                        }
+                    };
                 }
             }
+
+            $groups[] = function () use ($routes, $refClass, $class) {
+                $groupName    = '';
+                $groupOptions = [];
+                if ($groupAnn = $this->reader->getAnnotation($refClass, Group::class)) {
+                    $groupName    = $groupAnn->name;
+                    $groupOptions = $groupAnn->options;
+                }
+
+                $group = $this->route->group($groupName, function () use ($refClass, $class, $routes) {
+                    if ($resourceAnn = $this->reader->getAnnotation($refClass, Resource::class)) {
+                        //资源路由
+                        $this->route->resource($resourceAnn->rule, $class)->option($resourceAnn->options);
+                    }
+
+                    //注册路由
+                    foreach ($routes as $route) {
+                        $route();
+                    }
+                });
+
+                $group->option($groupOptions);
+
+                if ($middlewareAnn = $this->reader->getAnnotation($refClass, Middleware::class)) {
+                    $group->middleware($middlewareAnn->value);
+                }
+            };
+        }
+
+        if (!empty($groups)) {
+            $name = Arr::pull($options, 'name', '');
+            $this->route->group($name, function () use ($groups) {
+                //注册路由
+                foreach ($groups as $group) {
+                    $group();
+                }
+            })->option($options);
         }
     }
 
