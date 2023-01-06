@@ -51,6 +51,24 @@ class IndexController
 
 ~~~
 
+> 默认会扫描controller目录下的所有类  
+> 可对个别目录单独配置
+
+```php
+//...
+    'route'  => [
+        'enable'      => true,
+        'controllers' => [
+            app_path('controller/admin') => [
+                'name'       => 'admin/api',
+                'middleware' => [],
+            ],
+            root_path('other/controller')
+        ],
+    ],
+//...
+```
+
 ### 模型注解
 
 ~~~php
