@@ -20,6 +20,7 @@
 namespace app\controller;
 
 use think\annotation\Inject;
+use think\annotation\route\Get;
 use think\annotation\route\Group;
 use think\annotation\route\Middleware;
 use think\annotation\route\Resource;
@@ -41,12 +42,17 @@ class IndexController
         //...
     }
 
-    #[Route('xx')]
+    #[Route('GET','xx')]
     public function xx()
     {
         //...
     }
-
+    
+    #[Get('cc')]
+    public function cc()
+    {
+        //...
+    }
 }
 
 ~~~
