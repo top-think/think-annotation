@@ -14,6 +14,7 @@ use think\annotation\route\Validate;
 use think\App;
 use think\event\RouteLoaded;
 use think\helper\Arr;
+use think\helper\Str;
 
 /**
  * Trait InteractsWithRoute
@@ -29,16 +30,22 @@ trait InteractsWithRoute
 
     protected $parsedClass = [];
 
+    protected $controllerDir;
+
+    protected $controllerSuffix;
+
     protected function registerAnnotationRoute()
     {
         if ($this->app->config->get('annotation.route.enable', true)) {
             $this->app->event->listen(RouteLoaded::class, function () {
 
-                $this->route = $this->app->route;
+                $this->route            = $this->app->route;
+                $this->controllerDir    = realpath($this->app->getAppPath() . $this->app->config->get('route.controller_layer'));
+                $this->controllerSuffix = $this->app->config->get('route.controller_suffix') ? 'Controller' : '';
 
                 $dirs = array_merge(
                     $this->app->config->get('annotation.route.controllers', []),
-                    [$this->app->getAppPath() . $this->app->config->get('route.controller_layer')]
+                    [$this->controllerDir]
                 );
 
                 foreach ($dirs as $dir => $options) {
@@ -60,21 +67,37 @@ trait InteractsWithRoute
         $groups = [];
         foreach (Constructs::fromDirectory($dir) as $construct) {
             $class = $construct->name();
+
             if (in_array($class, $this->parsedClass)) {
                 continue;
             }
+
             $this->parsedClass[] = $class;
 
             $refClass = new ReflectionClass($class);
+
+            if ($refClass->isAbstract() || $refClass->isInterface() || $refClass->isTrait()) {
+                continue;
+            }
+
+            $filename = $construct->fileNames()[0];
+
+            $prefix = $class;
+
+            if (Str::startsWith($filename, $this->controllerDir)) {
+                //控制器
+                $filename = Str::substr($filename, strlen($this->controllerDir) + 1);
+                $prefix   = str_replace($this->controllerSuffix . '.php', '', str_replace('/', '.', $filename));
+            }
 
             $routes = [];
             //方法
             foreach ($refClass->getMethods(ReflectionMethod::IS_PUBLIC) as $refMethod) {
                 if ($routeAnn = $this->reader->getAnnotation($refMethod, Route::class)) {
 
-                    $routes[] = function () use ($routeAnn, $class, $refMethod) {
+                    $routes[] = function () use ($routeAnn, $prefix, $refMethod) {
                         //注册路由
-                        $rule = $this->route->rule($routeAnn->rule, "{$class}@{$refMethod->getName()}", $routeAnn->method);
+                        $rule = $this->route->rule($routeAnn->rule, "{$prefix}/{$refMethod->getName()}", $routeAnn->method);
 
                         $rule->option($routeAnn->options);
 
@@ -98,7 +121,7 @@ trait InteractsWithRoute
                 }
             }
 
-            $groups[] = function () use ($routes, $refClass, $class) {
+            $groups[] = function () use ($routes, $refClass, $prefix) {
                 $groupName    = '';
                 $groupOptions = [];
                 if ($groupAnn = $this->reader->getAnnotation($refClass, Group::class)) {
@@ -106,10 +129,10 @@ trait InteractsWithRoute
                     $groupOptions = $groupAnn->options;
                 }
 
-                $group = $this->route->group($groupName, function () use ($refClass, $class, $routes) {
+                $group = $this->route->group($groupName, function () use ($refClass, $prefix, $routes) {
                     if ($resourceAnn = $this->reader->getAnnotation($refClass, Resource::class)) {
                         //资源路由
-                        $this->route->resource($resourceAnn->rule, $class)->option($resourceAnn->options);
+                        $this->route->resource($resourceAnn->rule, $prefix)->option($resourceAnn->options);
                     }
 
                     //注册路由
