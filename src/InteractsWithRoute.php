@@ -130,14 +130,14 @@ trait InteractsWithRoute
                 }
 
                 $group = $this->route->group($groupName, function () use ($refClass, $prefix, $routes) {
-                    if ($resourceAnn = $this->reader->getAnnotation($refClass, Resource::class)) {
-                        //资源路由
-                        $this->route->resource($resourceAnn->rule, $prefix)->option($resourceAnn->options);
-                    }
-
                     //注册路由
                     foreach ($routes as $route) {
                         $route();
+                    }
+
+                    if ($resourceAnn = $this->reader->getAnnotation($refClass, Resource::class)) {
+                        //资源路由
+                        $this->route->resource($resourceAnn->rule, $prefix)->option($resourceAnn->options);
                     }
                 });
 
