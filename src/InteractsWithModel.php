@@ -65,11 +65,10 @@ trait InteractsWithModel
 
             $this->app->event->listen(ModelGenerator::class, function (ModelGenerator $generator) {
 
-                $attrs = $this->reader->getAnnotations($generator->getReflection(), Relation::class);
+                $annotations = $this->reader->getAnnotations($generator->getReflection(), Relation::class);
 
-                foreach ($attrs as $attr) {
-                    $annotation = $attr->newInstance();
-                    $property   = Str::snake($annotation->name);
+                foreach ($annotations as $annotation) {
+                    $property = Str::snake($annotation->name);
                     switch (true) {
                         case $annotation instanceof HasOne:
                             $generator->addMethod($annotation->name, \think\model\relation\HasOne::class, [], '');
