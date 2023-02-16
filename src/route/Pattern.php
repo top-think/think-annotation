@@ -5,12 +5,9 @@ namespace think\annotation\route;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final class Middleware
+final class Pattern
 {
-    public array $params;
-
-    public function __construct(public $value, ...$params)
+    public function __construct(public string $name, public string $value)
     {
-        $this->params = $params;
     }
 }

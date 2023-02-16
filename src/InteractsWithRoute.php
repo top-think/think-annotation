@@ -8,6 +8,7 @@ use ReflectionMethod;
 use think\annotation\route\Group;
 use think\annotation\route\Middleware;
 use think\annotation\route\Model;
+use think\annotation\route\Pattern;
 use think\annotation\route\Resource;
 use think\annotation\route\Route;
 use think\annotation\route\Validate;
@@ -101,9 +102,18 @@ trait InteractsWithRoute
 
                         $rule->option($routeAnn->options);
 
+                        //变量规则
+                        if (!empty($patternsAnn = $this->reader->getAnnotations($refMethod, Pattern::class))) {
+                            foreach ($patternsAnn as $patternAnn) {
+                                $rule->pattern([$patternAnn->name => $patternAnn->value]);
+                            }
+                        }
+
                         //中间件
-                        if ($middlewareAnn = $this->reader->getAnnotation($refMethod, Middleware::class)) {
-                            $rule->middleware($middlewareAnn->value);
+                        if (!empty($middlewaresAnn = $this->reader->getAnnotations($refMethod, Middleware::class))) {
+                            foreach ($middlewaresAnn as $middlewareAnn) {
+                                $rule->middleware($middlewareAnn->value, ...$middlewareAnn->params);
+                            }
                         }
 
                         //绑定模型,支持多个
@@ -143,8 +153,18 @@ trait InteractsWithRoute
 
                 $group->option($groupOptions);
 
-                if ($middlewareAnn = $this->reader->getAnnotation($refClass, Middleware::class)) {
-                    $group->middleware($middlewareAnn->value);
+                //变量规则
+                if (!empty($patternsAnn = $this->reader->getAnnotations($refClass, Pattern::class))) {
+                    foreach ($patternsAnn as $patternAnn) {
+                        $group->pattern([$patternAnn->name => $patternAnn->value]);
+                    }
+                }
+
+                //中间件
+                if (!empty($middlewaresAnn = $this->reader->getAnnotations($refClass, Middleware::class))) {
+                    foreach ($middlewaresAnn as $middlewareAnn) {
+                        $group->middleware($middlewareAnn->value, ...$middlewareAnn->params);
+                    }
                 }
             };
         }
