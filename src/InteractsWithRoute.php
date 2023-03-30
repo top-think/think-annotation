@@ -87,7 +87,7 @@ trait InteractsWithRoute
 
             if (Str::startsWith($filename, $this->controllerDir)) {
                 //控制器
-                $filename = Str::substr($filename, strlen($this->controllerDir) + 1);
+                $filename = Str::substr($filename, Str::length($this->controllerDir) + 1);
                 $prefix   = str_replace($this->controllerSuffix . '.php', '', str_replace('/', '.', $filename));
             }
 
