@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": "^8.0",
-        "topthink/framework": "^6.0",
+        "topthink/framework": "^6.0 || ^8.0",
         "ergebnis/classy": "^1.4"
     },
     "require-dev": {
