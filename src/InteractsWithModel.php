@@ -4,6 +4,7 @@ namespace think\annotation;
 
 use ReflectionClass;
 use ReflectionMethod;
+use think\annotation\model\option\Type;
 use think\annotation\model\Relation;
 use think\annotation\model\relation\BelongsTo;
 use think\annotation\model\relation\BelongsToMany;
@@ -59,8 +60,24 @@ trait InteractsWithModel
                         call_user_func([$model, 'macro'], $annotation->name, $relation);
                     }
 
-                    $this->detected[$className] = true;
+                    $options     = [];
+                    $annotations = $this->reader->getAnnotations(new ReflectionClass($model), Type::class);
+                    if (!empty($annotations)) {
+                        $options['type'] = [];
+                        foreach ($annotations as $annotation) {
+                            $options['type'][$annotation->name] = $annotation->type;
+                        }
+                    }
+
+                    $this->detected[$className] = [
+                        'options' => $options,
+                    ];
+                } else {
+                    $options = $this->detected[$className]['options'];
                 }
+
+                //options
+                $model->setOptions($options);
             });
 
             $this->app->event->listen(ModelGenerator::class, function (ModelGenerator $generator) {

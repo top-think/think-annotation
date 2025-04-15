@@ -1,6 +1,6 @@
 {
     "name": "topthink/think-annotation",
-    "description": "Annotation For ThinkPHP6",
+    "description": "Annotation For ThinkPHP",
     "license": "Apache-2.0",
     "authors": [
         {
@@ -9,8 +9,8 @@
         }
     ],
     "require": {
-        "php": "^8.0",
-        "topthink/framework": "^6.0 || ^8.0",
+        "topthink/framework": "^8.0",
+        "topthink/think-orm": "^4.0",
         "ergebnis/classy": "^1.4"
     },
     "require-dev": {

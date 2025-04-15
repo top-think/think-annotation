@@ -1,6 +1,4 @@
-# think-annotation for ThinkPHP6
-
-> PHP8版本
+# think-annotation for ThinkPHP
 
 ## 安装
 
@@ -92,5 +90,3 @@ class User extends Model
     //...
 }
 ~~~
-
-
