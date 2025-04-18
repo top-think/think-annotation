@@ -4,7 +4,15 @@ namespace think\annotation;
 
 use ReflectionClass;
 use ReflectionMethod;
+use think\annotation\model\option\Append;
+use think\annotation\model\option\CreateTime;
+use think\annotation\model\option\Hidden;
+use think\annotation\model\option\Mapping;
+use think\annotation\model\option\Pk;
+use think\annotation\model\option\Suffix;
 use think\annotation\model\option\Type;
+use think\annotation\model\option\UpdateTime;
+use think\annotation\model\option\Visible;
 use think\annotation\model\Relation;
 use think\annotation\model\relation\BelongsTo;
 use think\annotation\model\relation\BelongsToMany;
@@ -60,14 +68,21 @@ trait InteractsWithModel
                         call_user_func([$model, 'macro'], $annotation->name, $relation);
                     }
 
-                    $options     = [];
-                    $annotations = $this->reader->getAnnotations(new ReflectionClass($model), Type::class);
-                    if (!empty($annotations)) {
-                        $options['type'] = [];
-                        foreach ($annotations as $annotation) {
-                            $options['type'][$annotation->name] = $annotation->type;
-                        }
-                    }
+                    $options = [];
+                    $refClass = new ReflectionClass($model);
+
+                    // Handle annotations with a common method
+                    $this->processModelAnnotation($refClass, $options, Append::class, 'append', 'append');
+                    $this->processModelAnnotation($refClass, $options, CreateTime::class, 'create_time', 'name');
+                    $this->processModelAnnotation($refClass, $options, Hidden::class, 'hidden', 'hidden');
+                    $this->processModelAnnotation($refClass, $options, Pk::class, 'pk', 'name');
+                    $this->processModelAnnotation($refClass, $options, Suffix::class, 'suffix', 'suffix');
+                    $this->processModelAnnotation($refClass, $options, UpdateTime::class, 'update_time', 'name');
+                    $this->processModelAnnotation($refClass, $options, Visible::class, 'visible', 'visible');
+
+                    // Handle repeatable annotations with a common method
+                    $this->processRepeatableAnnotation($refClass, $options, Type::class, 'type', 'name', 'type');
+                    $this->processRepeatableAnnotation($refClass, $options, Mapping::class, 'mapping', 'field', 'name');
 
                     $this->detected[$className] = [
                         'options' => $options,
@@ -131,6 +146,43 @@ trait InteractsWithModel
                     }
                 }
             });
+        }
+    }
+
+    /**
+     * Process a model annotation and add it to the options array
+     *
+     * @param ReflectionClass $refClass The reflection class of the model
+     * @param array &$options The options array to modify
+     * @param string $annotationClass The annotation class to look for
+     * @param string $optionKey The key to use in the options array
+     * @param string $propertyName The property name to get from the annotation
+     */
+    protected function processModelAnnotation(ReflectionClass $refClass, array &$options, string $annotationClass, string $optionKey, string $propertyName): void
+    {
+        if ($annotation = $this->reader->getAnnotation($refClass, $annotationClass)) {
+            $options[$optionKey] = $annotation->{$propertyName};
+        }
+    }
+
+    /**
+     * Process repeatable model annotations and add them to the options array
+     *
+     * @param ReflectionClass $refClass The reflection class of the model
+     * @param array &$options The options array to modify
+     * @param string $annotationClass The annotation class to look for
+     * @param string $optionKey The key to use in the options array
+     * @param string $keyProperty The property name to use as key in the result array
+     * @param string $valueProperty The property name to use as value in the result array
+     */
+    protected function processRepeatableAnnotation(ReflectionClass $refClass, array &$options, string $annotationClass, string $optionKey, string $keyProperty, string $valueProperty): void
+    {
+        $annotations = $this->reader->getAnnotations($refClass, $annotationClass);
+        if (!empty($annotations)) {
+            $options[$optionKey] = [];
+            foreach ($annotations as $annotation) {
+                $options[$optionKey][$annotation->{$keyProperty}] = $annotation->{$valueProperty};
+            }
         }
     }
 }
