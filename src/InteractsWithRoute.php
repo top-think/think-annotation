@@ -2,7 +2,6 @@
 
 namespace think\annotation;
 
-use Ergebnis\Classy\Constructs;
 use ReflectionClass;
 use ReflectionMethod;
 use think\annotation\route\Group;
@@ -56,7 +55,7 @@ trait InteractsWithRoute
                     }
 
                     if (is_dir($dir)) {
-                        $this->scanDir($dir, $options);
+                        $this->scanDir(realpath($dir), $options);
                     }
                 }
             });
@@ -66,8 +65,36 @@ trait InteractsWithRoute
     protected function scanDir($dir, $options = [])
     {
         $groups = [];
-        foreach (Constructs::fromDirectory($dir) as $construct) {
-            $class = $construct->name();
+
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(
+            $dir,
+            \FilesystemIterator::FOLLOW_SYMLINKS,
+        ));
+
+        $namespace = Arr::pull($options, 'namespace') ?: $this->getNamespace($dir, $this->controllerDir, "{$this->app->getNamespace()}\\controller");
+
+        if (empty($namespace)) {
+            return;
+        }
+
+        foreach ($iterator as $fileInfo) {
+            /** @var \SplFileInfo $fileInfo */
+            if (!$fileInfo->isFile()) {
+                continue;
+            }
+
+            if ($fileInfo->getBasename('.php') === $fileInfo->getBasename()) {
+                continue;
+            }
+
+            $filename = $fileInfo->getRealPath();
+
+            $classNamespace = $this->getNamespace(dirname($filename), $dir, $namespace);
+            if (empty($namespace)) {
+                continue;
+            }
+
+            $class = "\\{$classNamespace}\\{$fileInfo->getBasename('.php')}";
 
             if (in_array($class, $this->parsedClass)) {
                 continue;
@@ -80,8 +107,6 @@ trait InteractsWithRoute
             if ($refClass->isAbstract() || $refClass->isInterface() || $refClass->isTrait()) {
                 continue;
             }
-
-            $filename = $construct->fileNames()[0];
 
             $prefix = $class;
 
@@ -180,4 +205,37 @@ trait InteractsWithRoute
         }
     }
 
+    /**
+     * Calculate the namespace based on the relative path between directories
+     *
+     * @param string $dir The directory to get the namespace for
+     * @param string $base The base directory
+     * @param string $baseNamespace The base namespace
+     * @return string|null The calculated namespace or null if $dir is not a subdirectory of $base
+     */
+    protected function getNamespace($dir, $base, $baseNamespace)
+    {
+        // Normalize directory separators
+        $dir  = rtrim(str_replace('\\', '/', $dir), '/') . '/';
+        $base = rtrim(str_replace('\\', '/', $base), '/') . '/';
+
+        // Check if $dir is a subdirectory of $base
+        if (!str_starts_with($dir, $base)) {
+            return null;
+        }
+
+        // Get the relative path
+        $relativePath = substr($dir, strlen($base));
+
+        // If the relative path is empty, return the base namespace
+        if (empty($relativePath) || $relativePath === '/') {
+            return $baseNamespace;
+        }
+
+        // Convert directory separators to namespace separators
+        $namespace = str_replace('/', '\\', rtrim($relativePath, '/'));
+
+        // Combine with the base namespace
+        return $baseNamespace . '\\' . $namespace;
+    }
 }
