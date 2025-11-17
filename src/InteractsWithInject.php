@@ -16,7 +16,12 @@ trait InteractsWithInject
     {
         if ($this->app->config->get('annotation.inject.enable', true)) {
             $this->app->resolving(function ($object, $app) {
-                if ($this->isInjectClass(get_class($object))) {
+                $class=get_class($object);
+                if ($this->isInjectClass($class)) {
+                    if (!$app->has($class))
+                    {
+                        $app->bind($class,$object);
+                    }
                     $refObject = new ReflectionObject($object);
                     foreach ($refObject->getProperties() as $refProperty) {
                         if ($refProperty->isDefault() && !$refProperty->isStatic()) {
@@ -29,7 +34,12 @@ trait InteractsWithInject
                                 }
 
                                 if (isset($type)) {
-                                    $value = $app->make($type);
+                                   if ($app->has($type))
+                                    {
+                                        $value=$app->get($type);
+                                    }else{
+                                        $value = $app->make($type);
+                                    }
                                     if (!$refProperty->isPublic()) {
                                         $refProperty->setAccessible(true);
                                     }
