@@ -15,13 +15,17 @@ trait InteractsWithInject
     protected function autoInject()
     {
         if ($this->app->config->get('annotation.inject.enable', true)) {
-            $this->app->resolving(function ($object, $app) {
+            $this->app->resolving(function ($object, $app){
+                if (!is_object($object)){
+                    return;
+                }
                 $class=get_class($object);
                 if ($this->isInjectClass($class)) {
                     if (!$app->has($class))
                     {
                         $app->bind($class,$object);
                     }
+
                     $refObject = new ReflectionObject($object);
                     foreach ($refObject->getProperties() as $refProperty) {
                         if ($refProperty->isDefault() && !$refProperty->isStatic()) {
@@ -34,7 +38,7 @@ trait InteractsWithInject
                                 }
 
                                 if (isset($type)) {
-                                   if ($app->has($type))
+                                    if ($app->has($type))
                                     {
                                         $value=$app->get($type);
                                     }else{
